@@ -16,6 +16,18 @@ body {
 }
 
 header {
+
+/* Hide bullet points for lists */
+ul, ol {
+  list-style-type: none;
+}
+
+/* Style for delete icon */
+.delete-icon {
+  cursor: pointer;
+  color: red;
+  margin-left: 10px;
+}
   text-align: center;
   padding: 20px 0;
   margin-bottom: 30px;

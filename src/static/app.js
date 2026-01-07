@@ -14,6 +14,34 @@ document.addEventListener("DOMContentLoaded", () => {
       activitiesList.innerHTML = "";
 
       // Populate activities list
+        const participantsList = document.getElementById("participants-list");
+        const deleteParticipant = async (participant, activityName) => {
+          try {
+            const response = await fetch(`/activities/${encodeURIComponent(activityName)}/unregister?email=${encodeURIComponent(participant)}`, {
+              method: "DELETE",
+            });
+            if (response.ok) {
+              // Refresh activities
+              fetchActivities();
+            } else {
+              console.error("Failed to unregister");
+            }
+          } catch (error) {
+            console.error("Error unregistering:", error);
+          }
+        };
+
+        // Example of adding participants
+        const addParticipant = (name) => {
+          const li = document.createElement('li');
+          li.textContent = name;
+          const deleteIcon = document.createElement('span');
+          deleteIcon.textContent = '🗑️';
+          deleteIcon.className = 'delete-icon';
+          deleteIcon.onclick = () => deleteParticipant(name);
+          li.appendChild(deleteIcon);
+          participantsList.appendChild(li);
+        };
       Object.entries(activities).forEach(([name, details]) => {
         const activityCard = document.createElement("div");
         activityCard.className = "activity-card";
@@ -26,10 +54,21 @@ document.addEventListener("DOMContentLoaded", () => {
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
           <p><strong>Participants:</strong></p>
-          <ul>
-            ${details.participants.map(p => `<li>${p}</li>`).join('')}
-          </ul>
         `;
+
+        const participantsUl = document.createElement("ul");
+        participantsUl.style.listStyleType = 'none';
+        details.participants.forEach(p => {
+          const li = document.createElement('li');
+          li.textContent = p;
+          const deleteIcon = document.createElement('span');
+          deleteIcon.textContent = '🗑️';
+          deleteIcon.className = 'delete-icon';
+          deleteIcon.onclick = () => deleteParticipant(p, name); // Pass activity name too
+          li.appendChild(deleteIcon);
+          participantsUl.appendChild(li);
+        });
+        activityCard.appendChild(participantsUl);
 
         activitiesList.appendChild(activityCard);
 
@@ -66,6 +105,8 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+        // Refresh activities list
+        fetchActivities();
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
